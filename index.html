@@ -218,6 +218,84 @@
         .nav-tabs button:hover:not(.active) {
             background: #f1f5f9;
         }
+        .mobile-topbar {
+            display: none;
+            width: 100%;
+            max-width: 1100px;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            position: relative;
+            z-index: 60;
+        }
+        .menu-btn {
+            border: 1px solid var(--border-color);
+            background: #fff;
+            color: var(--text-main);
+            border-radius: 8px;
+            padding: 8px 10px;
+            font-size: 18px;
+            line-height: 1;
+            cursor: pointer;
+            box-shadow: var(--shadow-sm);
+        }
+        .mobile-drawer {
+            display: none;
+            width: calc(100% - 20px);
+            max-width: 380px;
+            background: rgba(255, 255, 255, 0.96);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            box-shadow: 0 14px 36px rgba(15, 23, 42, 0.22);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            padding: 10px;
+            box-sizing: border-box;
+            position: fixed;
+            left: 10px;
+            top: 98px;
+            z-index: 55;
+            transform: translateY(-8px) scale(0.98);
+            opacity: 0;
+            transition: transform 0.18s ease, opacity 0.18s ease;
+        }
+        .mobile-drawer.open {
+            display: block;
+            transform: translateY(0) scale(1);
+            opacity: 1;
+        }
+        .mobile-drawer button {
+            width: 100%;
+            text-align: left;
+            border: none;
+            background: transparent;
+            color: var(--text-main);
+            border-radius: 10px;
+            padding: 11px 12px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.16s ease, transform 0.16s ease;
+        }
+        .mobile-drawer button:hover {
+            background: #eef2ff;
+        }
+        .mobile-drawer button:active {
+            transform: scale(0.985);
+        }
+        .mobile-drawer button.active {
+            background: var(--primary);
+            color: #fff;
+        }
+        .mobile-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.35);
+            z-index: 40;
+        }
+        .mobile-overlay.open {
+            display: block;
+        }
         
         .openclass-subject {
             color: #0000FF; /* 蓝色 */
@@ -232,13 +310,92 @@
             background-color: var(--bg-color);
             border: none !important;
         }
+
+        .ann-table {
+            table-layout: fixed;
+        }
+        .ann-table col:nth-child(1) {
+            width: 12%;
+        }
+        .ann-table col:nth-child(2) {
+            width: 36%;
+        }
+        .ann-table col:nth-child(3) {
+            width: 8%;
+        }
+        .ann-table col:nth-child(4) {
+            width: 7%;
+        }
+        .ann-table col:nth-child(5) {
+            width: 23%;
+        }
+        .ann-table col:nth-child(6) {
+            width: 11%;
+        }
+        .ann-table col:nth-child(7) {
+            width: 3%;
+        }
+        .ann-date {
+            font-weight: 600;
+            background: #f8fafc !important;
+            line-height: 1.5;
+            white-space: nowrap;
+        }
+        .ann-event {
+            text-align: left;
+            line-height: 1.6;
+        }
+        .ann-time {
+            color: #D4AF37;
+            font-weight: 600;
+        }
+        .ann-group-end td {
+            border-bottom: 2px solid #cbd5e1;
+        }
+        .ann-date-spacer td {
+            height: 12px;
+            padding: 0;
+            border: none !important;
+            background: #eef2ff !important;
+        }
+        .ann-week-toolbar {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 8px;
+            margin: 0 0 10px 0;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+        .ann-week-select {
+            min-width: 110px;
+            padding: 6px 26px 6px 10px;
+            font-size: 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: #fff;
+            color: var(--text-main);
+            cursor: pointer;
+        }
         
         @media (max-width: 768px) {
             body { padding: 10px 5px; }
             h1 { font-size: 24px; margin-bottom: 16px; }
+            .mobile-topbar { display: flex; }
+            .nav-tabs { display: none; }
             .controls { padding: 12px; gap: 12px; border-radius: 8px; margin-bottom: 16px; }
             .meta-info { margin-left: 0; width: 100%; text-align: center; }
             .table-container { padding: 10px; border-radius: 8px; }
+            .ann-date {
+                white-space: normal;
+                word-break: break-word;
+                overflow-wrap: anywhere;
+                font-size: 12px;
+                line-height: 1.35;
+            }
+
+            .openclass-table col:nth-child(1) { width: 27% !important; }
+            .openclass-table col:nth-child(2) { width: 73% !important; }
             
             /* Compact table on mobile */
             table { margin-bottom: 20px; }
@@ -267,6 +424,16 @@
 <body>
 
     <h1>课表查询系统</h1>
+    <div class="mobile-topbar">
+        <button class="menu-btn" id="menu-btn" onclick="toggleMobileMenu()">☰</button>
+    </div>
+    <div class="mobile-overlay" id="mobile-overlay" onclick="closeMobileMenu()"></div>
+
+    <div class="mobile-drawer" id="mobile-drawer">
+        <button id="m-tab-schedule" onclick="switchTab('schedule')">个人课表查询</button>
+        <button id="m-tab-openclass" onclick="switchTab('openclass')">本周公开课</button>
+        <button id="m-tab-annschedule" onclick="switchTab('annschedule')">行事历</button>
+    </div>
 
     <div class="nav-tabs">
         <button id="tab-schedule" class="active" onclick="switchTab('schedule')">个人课表查询</button>
@@ -301,6 +468,7 @@
         let globalData = null;
         let openClassData = null;
         let annScheduleData = null;
+        let currentTab = 'schedule';
 
         async function init() {
             try {
@@ -353,9 +521,14 @@
         }
 
         function switchTab(tab) {
+            currentTab = tab;
             document.getElementById('tab-schedule').className = tab === 'schedule' ? 'active' : '';
             document.getElementById('tab-openclass').className = tab === 'openclass' ? 'active' : '';
             document.getElementById('tab-annschedule').className = tab === 'annschedule' ? 'active' : '';
+            document.getElementById('m-tab-schedule').className = tab === 'schedule' ? 'active' : '';
+            document.getElementById('m-tab-openclass').className = tab === 'openclass' ? 'active' : '';
+            document.getElementById('m-tab-annschedule').className = tab === 'annschedule' ? 'active' : '';
+            closeMobileMenu();
             
             const controls = document.getElementById('controls');
             if (tab === 'schedule') {
@@ -376,6 +549,21 @@
                 loadAnnSchedule();
             }
         }
+        function toggleMobileMenu() {
+            const drawer = document.getElementById('mobile-drawer');
+            const overlay = document.getElementById('mobile-overlay');
+            drawer.classList.toggle('open');
+            overlay.classList.toggle('open', drawer.classList.contains('open'));
+            const btn = document.getElementById('menu-btn');
+            btn.innerText = drawer.classList.contains('open') ? '✕' : '☰';
+        }
+        function closeMobileMenu() {
+            const drawer = document.getElementById('mobile-drawer');
+            const overlay = document.getElementById('mobile-overlay');
+            drawer.classList.remove('open');
+            overlay.classList.remove('open');
+            document.getElementById('menu-btn').innerText = '☰';
+        }
 
         async function loadOpenClasses() {
             if (openClassData) {
@@ -395,7 +583,8 @@
         }
 
         function renderOpenClasses(data) {
-            let html = `<table style="margin-bottom: 40px;">`;
+            let html = `<table class="openclass-table" style="margin-bottom: 40px;">`;
+            html += `<colgroup><col style="width:30%"><col style="width:70%"></colgroup>`;
             html += `<tr class="title-row"><th colspan="${data.headers.length}">本周公开课</th></tr>`;
             html += `<tr class="created-row"><td colspan="${data.headers.length}">更新时间：${data.updated_at}</td></tr>`;
             
@@ -470,8 +659,74 @@
             }
         }
 
-        function renderAnnSchedule(data) {
-            let html = `<table style="margin-bottom: 40px;">`;
+        function renderAnnSchedule(data, selectedWeek = null) {
+            let viewData = data;
+            const hasWeeks = data && data.weeks && Object.keys(data.weeks).length > 0;
+            if (hasWeeks) {
+                const weekOrder = data.weeks_order || Object.keys(data.weeks).sort((a, b) => parseInt(a) - parseInt(b));
+                let wk = selectedWeek || String(data.current_week || weekOrder[0]);
+                if (!data.weeks[wk]) wk = weekOrder[0];
+                const weekData = data.weeks[wk] || { headers: [], rows: [] };
+                viewData = {
+                    headers: weekData.headers || data.headers || [],
+                    rows: weekData.rows || [],
+                    updated_at: data.updated_at,
+                    current_week: wk,
+                    weeks_order: weekOrder
+                };
+            }
+
+            const headers = viewData.headers || [];
+            const rows = (viewData.rows || []).map(row =>
+                Array.from({ length: headers.length }, (_, i) => String(row[i] ?? ""))
+            );
+
+            const escapeHtml = (text) =>
+                String(text)
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;")
+                    .replace(/'/g, "&#39;");
+
+            const highlightAnnTime = (text) => {
+                const safe = escapeHtml(text);
+                const m = safe.match(/^((?:上午|下午|晚上)?\s*\d{1,2}:\d{2})(\s*)(.*)$/);
+                if (!m) return safe;
+                return `<span class="ann-time">${m[1]}</span>${m[2]}${m[3]}`;
+            };
+            const formatAnnDate = (text) => {
+                const safe = escapeHtml(text);
+                const m = safe.match(/^(.*)\s+(星期[一二三四五六日天])$/);
+                if (!m) return safe;
+                return `${m[1]}<br>${m[2]}`;
+            };
+
+            let html = ``;
+            if (hasWeeks) {
+                const weekOrder = viewData.weeks_order || [];
+                const currentWeek = String(viewData.current_week || weekOrder[0] || "");
+                html += `<div class="ann-week-toolbar">`;
+                html += `<span>查看周次：</span>`;
+                html += `<select id="ann-week-select" class="ann-week-select">`;
+                weekOrder.forEach(w => {
+                    const sel = String(w) === currentWeek ? "selected" : "";
+                    html += `<option value="${w}" ${sel}>第${w}周</option>`;
+                });
+                html += `</select>`;
+                html += `</div>`;
+            }
+
+            html += `<table class="ann-table" style="margin-bottom: 40px;">`;
+            html += `<colgroup>
+                <col>
+                <col>
+                <col>
+                <col>
+                <col>
+                <col>
+                <col>
+            </colgroup>`;
             html += `<tr class="title-row"><th colspan="${data.headers.length}">行事历</th></tr>`;
             html += `<tr class="created-row"><td colspan="${data.headers.length}">更新时间：${data.updated_at}</td></tr>`;
             
@@ -480,27 +735,52 @@
                 html += `<th>${h}</th>`;
             });
             html += `</tr>`;
-            
-            let previousDate = null;
 
-            data.rows.forEach((row, idx) => {
-                const currentDate = row[0].trim();
-                if (currentDate) {
-                    if (previousDate !== null && currentDate !== previousDate) {
-                        html += `<tr class="openclass-spacer"><td colspan="${data.headers.length}" style="border:none;"></td></tr>`;
-                    }
-                    previousDate = currentDate;
+            let i = 0;
+            let visualIndex = 0;
+            while (i < rows.length) {
+                const dateText = rows[i][0].trim() || "未标注日期";
+                let j = i + 1;
+                while (j < rows.length && (rows[j][0].trim() || "未标注日期") === dateText) {
+                    j++;
                 }
+                const groupSize = j - i;
 
-                let rowClass = (idx % 2 === 0) ? "row-odd" : "row-even";
-                html += `<tr class="${rowClass}">`;
-                row.forEach((cell) => {
-                    html += `<td>${cell}</td>`;
-                });
-                html += `</tr>`;
-            });
+                for (let k = i; k < j; k++) {
+                    const rowClass = (visualIndex % 2 === 0) ? "row-odd" : "row-even";
+                    const endClass = (k === j - 1) ? " ann-group-end" : "";
+                    html += `<tr class="${rowClass}${endClass}">`;
+                    if (k === i) {
+                        html += `<td class="ann-date" rowspan="${groupSize}">${formatAnnDate(dateText)}</td>`;
+                    }
+
+                    for (let c = 1; c < headers.length; c++) {
+                        const cell = rows[k][c] || "";
+                        if (c === 1) {
+                            html += `<td class="ann-event">${highlightAnnTime(cell)}</td>`;
+                        } else {
+                            html += `<td>${escapeHtml(cell)}</td>`;
+                        }
+                    }
+                    html += `</tr>`;
+                    visualIndex++;
+                }
+                if (j < rows.length) {
+                    html += `<tr class="ann-date-spacer"><td colspan="${headers.length}"></td></tr>`;
+                }
+                i = j;
+            }
             html += `</table>`;
             document.getElementById('table-container').innerHTML = html;
+
+            if (hasWeeks) {
+                const sel = document.getElementById('ann-week-select');
+                if (sel) {
+                    sel.addEventListener('change', (e) => {
+                        renderAnnSchedule(data, e.target.value);
+                    });
+                }
+            }
         }
 
         function renderTable(username, entries) {
