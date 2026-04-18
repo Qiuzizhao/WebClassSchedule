@@ -167,7 +167,7 @@
         .schedule-scale-wrap {
             width: 100%;
             margin-bottom: 40px;
-            overflow-x: auto;
+            overflow-x: hidden;
             overflow-y: visible;
         }
         .schedule-table {
@@ -416,6 +416,7 @@
             .title-row th { font-size: 18px; padding: 12px 4px 8px; }
             .created-row td { font-size: 12px; padding: 0 4px 12px; }
             .schedule-table td span { white-space: nowrap; }
+            .schedule-table td, .schedule-table th { font-size: 11px; padding: 6px 1px; }
             
             /* Remove extra styling on mobile to save space */
             td.day-mon, th.day-mon { border-left: none; }
@@ -897,7 +898,7 @@
                         let cellHtml = "";
                         if (data && data.courses.length > 0) {
                             const style = data.color ? `style="color: #${data.color}"` : "";
-                            cellHtml = `<span ${style}>${data.courses.join('<br>')}</span>`;
+                            cellHtml = `<span ${style}>${data.courses.join(' / ')}</span>`;
                         }
                         tr += `<td class="${idx === 0 ? 'day-mon' : ''}">${cellHtml}</td>`;
                     });
@@ -920,7 +921,7 @@
                         let cellHtml = "";
                         if (data && data.courses.length > 0) {
                             const style = data.color ? `style="color: #${data.color}"` : "";
-                            cellHtml = `<span ${style}>${data.courses.join('<br>')}</span>`;
+                            cellHtml = `<span ${style}>${data.courses.join(' / ')}</span>`;
                         }
                         let trClass = idx === 0 ? 'day-mon' : '';
                         html += `<td class="${trClass}">${cellHtml}</td>`;
@@ -956,11 +957,10 @@
                     wrap.style.height = '';
                     return;
                 }
-                // 参考线上样式，采用轻量缩放，避免在窄屏下过度缩小
-                const baseWidth = 430;
+                // 手机端强制整表可见：按容器宽度等比缩放，不允许横向滚动
+                const baseWidth = 760;
                 const available = wrap.clientWidth || 1;
-                const rawScale = Math.min(1, available / baseWidth);
-                const scale = Math.max(0.86, rawScale);
+                const scale = Math.min(1, available / baseWidth);
                 table.style.width = `${baseWidth}px`;
                 table.style.transformOrigin = 'top left';
                 table.style.transform = `scale(${scale})`;
