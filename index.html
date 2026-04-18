@@ -164,6 +164,14 @@
             display: inline-block;
             line-height: 1.6;
         }
+        .schedule-scale-wrap {
+            width: 100%;
+            margin-bottom: 40px;
+            overflow: visible;
+        }
+        .schedule-table {
+            margin-bottom: 0 !important;
+        }
         
         td.day-mon, th.day-mon { 
             border-left: 2px solid var(--border-color); 
@@ -406,6 +414,7 @@
             th, td { padding: 8px 2px; font-size: 13px; line-height: 1.3; }
             .title-row th { font-size: 18px; padding: 12px 4px 8px; }
             .created-row td { font-size: 12px; padding: 0 4px 12px; }
+            .schedule-table td span { white-space: nowrap; }
             
             /* Remove extra styling on mobile to save space */
             td.day-mon, th.day-mon { border-left: none; }
@@ -868,7 +877,7 @@
                 }
 
                 // 2. 生成 HTML 表格
-                let html = `<table style="margin-bottom: 40px;">`;
+                let html = `<div class="schedule-scale-wrap"><table class="schedule-table" style="margin-bottom: 40px;">`;
                 html += `<tr class="title-row"><th colspan="${WEEKDAYS.length + 2}">${title}</th></tr>`;
                 html += `<tr class="created-row"><td colspan="${WEEKDAYS.length + 2}">创建时间：${globalData.updated_at}</td></tr>`;
                 
@@ -925,14 +934,39 @@
                 html += renderSpecialRow("作业");
                 html += renderSpecialRow("课后2");
 
-                html += `</table>`;
+                html += `</table></div>`;
                 finalHtml += html;
             });
             
             container.innerHTML = finalHtml;
+            applyScheduleScaling();
+        }
+
+        function applyScheduleScaling() {
+            const wraps = document.querySelectorAll('.schedule-scale-wrap');
+            const isMobile = window.matchMedia('(max-width: 768px)').matches;
+            wraps.forEach(wrap => {
+                const table = wrap.querySelector('.schedule-table');
+                if (!table) return;
+                if (!isMobile) {
+                    table.style.transform = '';
+                    table.style.transformOrigin = '';
+                    table.style.width = '';
+                    wrap.style.height = '';
+                    return;
+                }
+                const baseWidth = 760;
+                const available = wrap.clientWidth || 1;
+                const scale = Math.min(1, available / baseWidth);
+                table.style.width = `${baseWidth}px`;
+                table.style.transformOrigin = 'top left';
+                table.style.transform = `scale(${scale})`;
+                wrap.style.height = `${Math.ceil(table.offsetHeight * scale)}px`;
+            });
         }
 
         window.onload = init;
+        window.addEventListener('resize', applyScheduleScaling);
     </script>
 </body>
 </html>
