@@ -167,7 +167,8 @@
         .schedule-scale-wrap {
             width: 100%;
             margin-bottom: 40px;
-            overflow: visible;
+            overflow-x: auto;
+            overflow-y: visible;
         }
         .schedule-table {
             margin-bottom: 0 !important;
@@ -955,9 +956,11 @@
                     wrap.style.height = '';
                     return;
                 }
-                const baseWidth = 760;
+                // 参考线上样式，采用轻量缩放，避免在窄屏下过度缩小
+                const baseWidth = 430;
                 const available = wrap.clientWidth || 1;
-                const scale = Math.min(1, available / baseWidth);
+                const rawScale = Math.min(1, available / baseWidth);
+                const scale = Math.max(0.86, rawScale);
                 table.style.width = `${baseWidth}px`;
                 table.style.transformOrigin = 'top left';
                 table.style.transform = `scale(${scale})`;
