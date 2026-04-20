@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-04-20 17:05:03",
+  "updated_at": "2026-04-20 18:05:03",
   "week_start": "2026-04-20",
   "current_week": null,
   "users": [
@@ -680,9 +680,9 @@
         "section_no": 0,
         "section": "课后2",
         "time": "16:55",
-        "course": "三(12)",
+        "course": "三(1)",
         "course_color": "",
-        "raw_text": "三(12)"
+        "raw_text": "三(1)"
       },
       {
         "week_no": 9,
@@ -929,9 +929,9 @@
         "section_no": 0,
         "section": "课后2",
         "time": "16:55",
-        "course": "三(12)",
+        "course": "三(1)",
         "course_color": "",
-        "raw_text": "三(12)"
+        "raw_text": "三(1)"
       }
     ],
     "周林": [
@@ -1180,9 +1180,9 @@
         "section_no": 0,
         "section": "课后2",
         "time": "16:55",
-        "course": "三(9)",
+        "course": "三(10)",
         "course_color": "",
-        "raw_text": "三(9)"
+        "raw_text": "三(10)"
       },
       {
         "week_no": 9,
@@ -1407,9 +1407,9 @@
         "section_no": 0,
         "section": "课后2",
         "time": "16:55",
-        "course": "三(9)",
+        "course": "三(10)",
         "course_color": "",
-        "raw_text": "三(9)"
+        "raw_text": "三(10)"
       }
     ],
     "陈思": [
@@ -2092,9 +2092,9 @@
         "section_no": 0,
         "section": "课后2",
         "time": "16:55",
-        "course": "五(2)",
+        "course": "五(3)",
         "course_color": "",
-        "raw_text": "五(2)"
+        "raw_text": "五(3)"
       },
       {
         "week_no": 9,
@@ -2308,9 +2308,9 @@
         "section_no": 0,
         "section": "课后2",
         "time": "16:55",
-        "course": "五(2)",
+        "course": "五(3)",
         "course_color": "",
-        "raw_text": "五(2)"
+        "raw_text": "五(3)"
       }
     ],
     "王尧": [
@@ -2603,9 +2603,9 @@
         "section_no": 0,
         "section": "课后2",
         "time": "16:55",
-        "course": "二(7)",
+        "course": "二(8)",
         "course_color": "",
-        "raw_text": "二(7)"
+        "raw_text": "二(8)"
       },
       {
         "week_no": 9,
@@ -2896,9 +2896,9 @@
         "section_no": 0,
         "section": "课后2",
         "time": "16:55",
-        "course": "二(7)",
+        "course": "二(8)",
         "course_color": "",
-        "raw_text": "二(7)"
+        "raw_text": "二(8)"
       }
     ]
   }
