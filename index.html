@@ -1194,8 +1194,8 @@
             
             data.announcements.forEach((ann, index) => {
                 let displayTitle = ann.title;
-                // 将形如“教学处:”或“德育处:”的前缀替换为带蓝色的 span
-                const deptMatch = displayTitle.match(/^([\u4e00-\u9fa5]+[处室中心部组]:)(.*)$/);
+                // 将形如“教学处:”或“校办:”等部门前缀替换为带蓝色的 span
+                const deptMatch = displayTitle.match(/^([\u4e00-\u9fa5]+(?:处|室|中心|部|组|办):)(.*)$/);
                 if (deptMatch) {
                     displayTitle = `<span class="announcement-dept">${deptMatch[1]}</span>${deptMatch[2]}`;
                 }
