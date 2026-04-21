@@ -1082,7 +1082,8 @@
                             cellData = rawData;
                         }
                         
-                        cellData = cellData.replace(/\((.+?)\)/g, `<br><span class="teacher-name"${colorStyle}>($1)</span>`);
+                        // 科目和老师由空格分隔，所以将其替换为换行并在老师名字上添加样式
+                        cellData = cellData.replace(/\s+(.+)$/, `<br><span class="teacher-name"${colorStyle}>$1</span>`);
                     }
                     let trClass = idx === 0 ? 'day-mon' : '';
                     html += `<td class="${trClass}"><span${colorStyle}>${cellData}</span></td>`;
