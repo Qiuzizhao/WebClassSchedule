@@ -1047,7 +1047,11 @@
                 let time = FIXED_SPECIAL.find(f=>f.id===mId)?.defaultTime || "";
                 let tr = `<tr class="row-special"><td>${time}</td><td>${mId}</td>`;
                 daysToShow.forEach((wd, idx) => {
-                    tr += `<td class="${idx === 0 ? 'day-mon' : ''}"></td>`;
+                    let cellData = schedule.special && schedule.special[wd] ? schedule.special[wd][mId] : "";
+                    if (cellData) {
+                        cellData = `<span style="font-size: 13px; color: var(--text-muted);">${cellData}</span>`;
+                    }
+                    tr += `<td class="${idx === 0 ? 'day-mon' : ''}">${cellData}</td>`;
                 });
                 tr += `</tr>`;
                 return tr;
