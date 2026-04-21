@@ -378,6 +378,11 @@
             cursor: pointer;
         }
         
+        .teacher-name {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        
         @media (max-width: 768px) {
             body { padding: 10px 5px; }
             h1 { font-size: 24px; margin-bottom: 16px; }
@@ -444,19 +449,27 @@
         <button id="m-tab-schedule" onclick="switchTab('schedule')">个人课表查询</button>
         <button id="m-tab-openclass" onclick="switchTab('openclass')">本周公开课</button>
         <button id="m-tab-annschedule" onclick="switchTab('annschedule')">行事历</button>
+        <button id="m-tab-allschedule" onclick="switchTab('allschedule')">全校课程表</button>
     </div>
 
     <div class="nav-tabs">
         <button id="tab-schedule" class="active" onclick="switchTab('schedule')">个人课表查询</button>
         <button id="tab-openclass" onclick="switchTab('openclass')">本周公开课</button>
         <button id="tab-annschedule" onclick="switchTab('annschedule')">行事历</button>
+        <button id="tab-allschedule" onclick="switchTab('allschedule')">全校课程表</button>
     </div>
     
     <div class="controls" id="controls">
-        <label for="user-select">选择用户：</label>
+        <label for="user-select" id="user-label">选择用户：</label>
         <select id="user-select" disabled>
             <option value="">加载中...</option>
         </select>
+        
+        <label for="class-select" id="class-label" style="display: none;">选择班级：</label>
+        <select id="class-select" style="display: none;" disabled>
+            <option value="">加载中...</option>
+        </select>
+        
         <div class="meta-info" id="meta-info"></div>
     </div>
 
@@ -479,6 +492,7 @@
         let globalData = null;
         let openClassData = null;
         let annScheduleData = null;
+        let allScheduleData = null;
         let currentTab = 'schedule';
 
         async function init() {
@@ -536,22 +550,39 @@
             document.getElementById('tab-schedule').className = tab === 'schedule' ? 'active' : '';
             document.getElementById('tab-openclass').className = tab === 'openclass' ? 'active' : '';
             document.getElementById('tab-annschedule').className = tab === 'annschedule' ? 'active' : '';
+            document.getElementById('tab-allschedule').className = tab === 'allschedule' ? 'active' : '';
             document.getElementById('m-tab-schedule').className = tab === 'schedule' ? 'active' : '';
             document.getElementById('m-tab-openclass').className = tab === 'openclass' ? 'active' : '';
             document.getElementById('m-tab-annschedule').className = tab === 'annschedule' ? 'active' : '';
+            document.getElementById('m-tab-allschedule').className = tab === 'allschedule' ? 'active' : '';
             closeMobileMenu();
             
             const controls = document.getElementById('controls');
+            const userLabel = document.getElementById('user-label');
+            const userSelect = document.getElementById('user-select');
+            const classLabel = document.getElementById('class-label');
+            const classSelect = document.getElementById('class-select');
+            
             if (tab === 'schedule') {
                 controls.style.display = 'flex';
+                userLabel.style.display = '';
+                userSelect.style.display = '';
+                classLabel.style.display = 'none';
+                classSelect.style.display = 'none';
                 if (globalData) {
-                    const select = document.getElementById('user-select');
-                    if (select.value) {
-                        renderTable(select.value, globalData.schedules[select.value]);
+                    if (userSelect.value) {
+                        renderTable(userSelect.value, globalData.schedules[userSelect.value]);
                     } else {
                         document.getElementById('table-container').innerHTML = '';
                     }
                 }
+            } else if (tab === 'allschedule') {
+                controls.style.display = 'flex';
+                userLabel.style.display = 'none';
+                userSelect.style.display = 'none';
+                classLabel.style.display = '';
+                classSelect.style.display = '';
+                loadAllSchedule();
             } else if (tab === 'openclass') {
                 controls.style.display = 'none';
                 loadOpenClasses();
@@ -941,6 +972,117 @@
             });
             
             container.innerHTML = finalHtml;
+        }
+
+        async function loadAllSchedule() {
+            if (allScheduleData) {
+                const select = document.getElementById('class-select');
+                if (select.value) {
+                    renderAllSchedule(select.value, allScheduleData);
+                }
+                return;
+            }
+            try {
+                document.getElementById('table-container').innerHTML = '<div class="loading">正在拉取全校课表数据...</div>';
+                const resp = await fetch(`./data/all_schedule.json?t=${new Date().getTime()}`);
+                if (!resp.ok) throw new Error("未找到全校课表数据");
+                const data = await resp.json();
+                allScheduleData = data;
+                
+                document.getElementById('meta-info').innerText = `最后更新时间：${data.updated_at}`;
+                
+                const select = document.getElementById('class-select');
+                select.innerHTML = '<option value="">-- 请选择 --</option>';
+                data.classes.forEach(c => {
+                    const opt = document.createElement('option');
+                    opt.value = c;
+                    opt.innerText = c;
+                    select.appendChild(opt);
+                });
+                select.disabled = false;
+
+                select.addEventListener('change', (e) => {
+                    if (e.target.value) {
+                        renderAllSchedule(e.target.value, data);
+                    } else {
+                        document.getElementById('table-container').innerHTML = '';
+                    }
+                });
+                
+                if (data.classes.length > 0) {
+                    select.value = data.classes[0];
+                    renderAllSchedule(data.classes[0], data);
+                } else {
+                    document.getElementById('loading-msg').innerText = "暂无数据";
+                }
+            } catch (err) {
+                document.getElementById('table-container').innerHTML = `<div class="error">${err.message}</div>`;
+            }
+        }
+
+        function renderAllSchedule(className, data) {
+            const container = document.getElementById('table-container');
+            const schedule = data.schedules[className];
+            if (!schedule) {
+                container.innerHTML = '<div class="loading">暂无该班级的课表数据</div>';
+                return;
+            }
+
+            // We only show Monday to Friday, up to 6 sections
+            const daysToShow = data.days.slice(0, 5);
+            const title = `${className} 全校课程表`;
+
+            let html = `<table style="margin-bottom: 40px;">`;
+            html += `<tr class="title-row"><th colspan="${daysToShow.length + 2}">${title}</th></tr>`;
+            html += `<tr class="created-row"><td colspan="${daysToShow.length + 2}">更新时间：${data.updated_at}</td></tr>`;
+            
+            // Header
+            html += `<tr><th class="col-time">时间</th><th class="col-sec">节次</th>`;
+            daysToShow.forEach((wd, idx) => {
+                html += `<th class="col-day ${idx === 0 ? 'day-mon' : ''}">${wd}</th>`;
+            });
+            html += `</tr>`;
+
+            const renderSpecialRow = (mId) => {
+                let time = FIXED_SPECIAL.find(f=>f.id===mId)?.defaultTime || "";
+                let tr = `<tr class="row-special"><td>${time}</td><td>${mId}</td>`;
+                daysToShow.forEach((wd, idx) => {
+                    tr += `<td class="${idx === 0 ? 'day-mon' : ''}"></td>`;
+                });
+                tr += `</tr>`;
+                return tr;
+            };
+
+            html += renderSpecialRow("晨间管理");
+
+            for (let sec = 1; sec <= 6; sec++) {
+                let time = DEFAULT_TIMES[sec] || "";
+                let label = `第${sec}节`;
+                
+                let rowClass = sec % 2 === 1 ? "row-odd" : "row-even";
+                let splitClass = sec === 4 ? "split-bottom" : "";
+                
+                html += `<tr class="${rowClass} ${splitClass}"><td>${time}</td><td>${label}</td>`;
+                daysToShow.forEach((wd, idx) => {
+                    let cellData = schedule[wd] ? schedule[wd][sec - 1] : "";
+                    if (cellData) {
+                        cellData = cellData.replace(/\((.+?)\)/g, '<br><span class="teacher-name">($1)</span>');
+                    }
+                    let trClass = idx === 0 ? 'day-mon' : '';
+                    html += `<td class="${trClass}"><span>${cellData}</span></td>`;
+                });
+                html += `</tr>`;
+
+                if (sec === 4) {
+                    html += renderSpecialRow("午休时间");
+                }
+            }
+
+            html += renderSpecialRow("作业");
+            html += renderSpecialRow("课后2");
+
+            html += `</table>`;
+            container.innerHTML = html;
         }
 
         window.onload = init;
