@@ -410,6 +410,9 @@
             flex: 1;
             padding-right: 16px;
         }
+        .announcement-dept {
+            color: #0000FF;
+        }
         .announcement-date {
             color: var(--text-muted);
             font-size: 14px;
@@ -1190,10 +1193,17 @@
             html += `<div style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">更新时间：${data.updated_at}</div>`;
             
             data.announcements.forEach((ann, index) => {
+                let displayTitle = ann.title;
+                // 将形如“教学处:”或“德育处:”的前缀替换为带蓝色的 span
+                const deptMatch = displayTitle.match(/^([\u4e00-\u9fa5]+[处室中心部组]:)(.*)$/);
+                if (deptMatch) {
+                    displayTitle = `<span class="announcement-dept">${deptMatch[1]}</span>${deptMatch[2]}`;
+                }
+
                 html += `
                 <div class="announcement-card">
                     <div class="announcement-header" onclick="toggleAnnouncement(${index})">
-                        <div class="announcement-title">${ann.title}</div>
+                        <div class="announcement-title">${displayTitle}</div>
                         <div class="announcement-date">${ann.date}</div>
                     </div>
                     <div id="ann-content-${index}" class="announcement-content">
