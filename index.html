@@ -382,6 +382,57 @@
             font-size: 12px;
             color: var(--text-muted);
         }
+
+        .announcement-card {
+            margin-bottom: 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            background: #fff;
+            box-shadow: var(--shadow-sm);
+        }
+        .announcement-header {
+            padding: 16px 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--table-header-bg);
+            transition: background 0.2s;
+        }
+        .announcement-header:hover {
+            background: #eef2ff;
+        }
+        .announcement-title {
+            font-weight: 600;
+            font-size: 16px;
+            color: var(--text-main);
+            flex: 1;
+            padding-right: 16px;
+        }
+        .announcement-date {
+            color: var(--text-muted);
+            font-size: 14px;
+            white-space: nowrap;
+        }
+        .announcement-content {
+            display: none;
+            padding: 20px;
+            font-size: 15px;
+            line-height: 1.6;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-main);
+            overflow-x: auto;
+        }
+        /* Override styles inside announcement content to match our theme */
+        .announcement-content table {
+            margin-bottom: 16px;
+            width: 100% !important;
+        }
+        .announcement-content p {
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
         
         @media (max-width: 768px) {
             body { padding: 10px 5px; }
@@ -450,6 +501,7 @@
         <button id="m-tab-openclass" onclick="switchTab('openclass')">本周公开课</button>
         <button id="m-tab-annschedule" onclick="switchTab('annschedule')">行事历</button>
         <button id="m-tab-allschedule" onclick="switchTab('allschedule')">全校课程表</button>
+        <button id="m-tab-announcements" onclick="switchTab('announcements')">最新通知</button>
     </div>
 
     <div class="nav-tabs">
@@ -457,6 +509,7 @@
         <button id="tab-openclass" onclick="switchTab('openclass')">本周公开课</button>
         <button id="tab-annschedule" onclick="switchTab('annschedule')">行事历</button>
         <button id="tab-allschedule" onclick="switchTab('allschedule')">全校课程表</button>
+        <button id="tab-announcements" onclick="switchTab('announcements')">最新通知</button>
     </div>
     
     <div class="controls" id="controls">
@@ -493,6 +546,7 @@
         let openClassData = null;
         let annScheduleData = null;
         let allScheduleData = null;
+        let announcementsData = null;
         let currentTab = 'schedule';
 
         async function init() {
@@ -551,10 +605,12 @@
             document.getElementById('tab-openclass').className = tab === 'openclass' ? 'active' : '';
             document.getElementById('tab-annschedule').className = tab === 'annschedule' ? 'active' : '';
             document.getElementById('tab-allschedule').className = tab === 'allschedule' ? 'active' : '';
+            document.getElementById('tab-announcements').className = tab === 'announcements' ? 'active' : '';
             document.getElementById('m-tab-schedule').className = tab === 'schedule' ? 'active' : '';
             document.getElementById('m-tab-openclass').className = tab === 'openclass' ? 'active' : '';
             document.getElementById('m-tab-annschedule').className = tab === 'annschedule' ? 'active' : '';
             document.getElementById('m-tab-allschedule').className = tab === 'allschedule' ? 'active' : '';
+            document.getElementById('m-tab-announcements').className = tab === 'announcements' ? 'active' : '';
             closeMobileMenu();
             
             const controls = document.getElementById('controls');
@@ -589,6 +645,9 @@
             } else if (tab === 'annschedule') {
                 controls.style.display = 'none';
                 loadAnnSchedule();
+            } else if (tab === 'announcements') {
+                controls.style.display = 'none';
+                loadAnnouncements();
             }
         }
         function toggleMobileMenu() {
@@ -1101,6 +1160,59 @@
             html += `</table>`;
             container.innerHTML = html;
         }
+
+        async function loadAnnouncements() {
+            if (announcementsData) {
+                renderAnnouncements(announcementsData);
+                return;
+            }
+            try {
+                document.getElementById('table-container').innerHTML = '<div class="loading">正在拉取最新通知...</div>';
+                const resp = await fetch(`./data/announcements.json?t=${new Date().getTime()}`);
+                if (!resp.ok) throw new Error("未找到最新通知数据");
+                const data = await resp.json();
+                announcementsData = data;
+                renderAnnouncements(data);
+            } catch (err) {
+                document.getElementById('table-container').innerHTML = `<div class="error">${err.message}</div>`;
+            }
+        }
+
+        function renderAnnouncements(data) {
+            const container = document.getElementById('table-container');
+            if (!data || !data.announcements || data.announcements.length === 0) {
+                container.innerHTML = '<div class="loading">最近7天暂无通知</div>';
+                return;
+            }
+
+            let html = `<div class="announcements-container" style="text-align: left;">`;
+            html += `<h2 style="color: var(--primary); margin-top: 0; margin-bottom: 8px; font-size: 22px;">最新通知</h2>`;
+            html += `<div style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">更新时间：${data.updated_at}</div>`;
+            
+            data.announcements.forEach((ann, index) => {
+                html += `
+                <div class="announcement-card">
+                    <div class="announcement-header" onclick="toggleAnnouncement(${index})">
+                        <div class="announcement-title">${ann.title}</div>
+                        <div class="announcement-date">${ann.date}</div>
+                    </div>
+                    <div id="ann-content-${index}" class="announcement-content">
+                        ${ann.content}
+                    </div>
+                </div>`;
+            });
+            html += `</div>`;
+            container.innerHTML = html;
+        }
+
+        window.toggleAnnouncement = function(index) {
+            const content = document.getElementById(`ann-content-${index}`);
+            if (content.style.display === 'block') {
+                content.style.display = 'none';
+            } else {
+                content.style.display = 'block';
+            }
+        };
 
         window.onload = init;
     </script>
